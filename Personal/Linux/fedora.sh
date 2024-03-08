@@ -86,7 +86,7 @@ deployment() {
        
 	 5)
             echo "Installing General Tools"
-            dnfSys=('fontawesome4-fonts' 'fzf' 'htop' 'kitty' 'pip' 'ranger' 'unzip' 'zsh')
+            dnfSys=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'pip' 'ranger' 'unzip' 'zsh')
             dnfInstall "${dnfSys[@]}"
 	    echo "Changing default shell to ZSH"
             chsh -s $(which zsh)
