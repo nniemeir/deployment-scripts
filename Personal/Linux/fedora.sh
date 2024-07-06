@@ -1,4 +1,5 @@
 #! /bin/bash
+# Author: Jacob Niemeir <nniemeir@protonmail.com>
 dnfInstall() {
     local dpackages=("${@}")
     for package in "${dpackages[@]}"; do
