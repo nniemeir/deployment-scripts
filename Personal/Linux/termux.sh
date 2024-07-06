@@ -1,4 +1,5 @@
 #!/bin/bash
+# Author: Jacob Niemeir <nniemeir@protonmail.com>
 
 preDeployment() {
 echo "Updating Packages"
