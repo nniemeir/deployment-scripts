@@ -67,7 +67,7 @@ deployment() {
         3)
             echo "Installing Development Tools"
             dnfDev=('g++')
-            flatpakDev=('com.visualstudio.code-oss')
+            flatpakDev=('com.visualstudio.code-oss' 'io.qt.QtCreator' 'net.sf.VICE')
             sudo dnf groupinstall "Development Tools" -y
             dnfInstall "${dnfDev[@]}"
             flatpakInstall "${flatpakDev[@]}"
@@ -106,7 +106,7 @@ deployment() {
             dnfMedia=('cmus' 'feh' 'mpv' 'mpv-mpris')
             dnfInstall "${dnfMedia[@]}"
 	    sudo dnf install ffmpeg -y --allowerasing
-            flatpakMedia=('io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission')
+            flatpakMedia=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
             flatpakInstall "${flatpakMedia[@]}"
             ;;
         7)
