@@ -2,5 +2,5 @@
 
 My personal deployment scripts for the following environments:
 
-* Fedora Workstation 40
+* Fedora Workstation
 * Termux
