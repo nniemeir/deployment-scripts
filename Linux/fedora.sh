@@ -50,7 +50,7 @@ deployment() {
         1)
             echo "Installing Academic Tools"
             dnfAcademic=('neovim' 'qalc' 'texlive-scheme-full' 'zathura' 'zathura-pdf-mupdf')
-            flatpakAcademic=('com.discordapp.Discord' 'org.libreoffice.LibreOffice' 'nz.mega.MEGAsync' 'md.obsidian.Obsidian' 'org.mozilla.Thunderbird')
+            flatpakAcademic=('org.libreoffice.LibreOffice' 'nz.mega.MEGAsync' 'org.mozilla.Thunderbird')
             dnfInstall "${dnfAcademic[@]}"
             flatpakInstall "${flatpakAcademic[@]}"
             ;;
