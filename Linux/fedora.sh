@@ -1,26 +1,39 @@
 #! /bin/bash
 # Author: Jacob Niemeir <nniemeir@protonmail.com>
-dnfInstall() {
+
+main() {
+    pre_deployment
+    deployment
+    reboot_prompt
+}
+
+dnf_install() {
     local dpackages=("${@}")
     for package in "${dpackages[@]}"; do
-        sudo dnf install $package -y
-    done
-}
-flatpakInstall() {
-    local fpackages=("${@}")
-    for package in "${fpackages[@]}"; do
-        flatpak install https://dl.flathub.org/repo/appstream/$package.flatpakref -y
+        if ! sudo dnf install $package -y; then
+            echo "Failed to install $package, exiting..."
+            exit 1
+        fi
     done
 }
 
-preDeployment() {
+flatpak_install() {
+    local fpackages=("${@}")
+    for package in "${fpackages[@]}"; do
+        if ! flatpak install https://dl.flathub.org/repo/appstream/$package.flatpakref -y; then
+            echo "Failed to install $package, exiting..."
+            exit 1
+        fi
+    done
+}
+
+pre_deployment() {
     echo "Installing script dependencies"
-    sudo dnf install dialog flatpak git -y
+    dnf_dependencies=('dialog' 'flatpak' 'git')
+    dnf_install "${dnf_dependencies[@]}"
     echo "Enabling RPM Fusion"
     sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
     sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
-    echo "Installing Flatpak"
-    sudo dnf install flatpak -y
     echo "Adding Flatpak Repository"
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo -y
     echo "Tuning dnf"
@@ -39,7 +52,7 @@ deployment() {
         3 "Development" on
         4 "Gaming" off
         5 "General" on
-	6 "Multimedia" on
+        6 "Multimedia" on
         7 "Security" on
         8 "Virtualization" off
     )
@@ -49,15 +62,15 @@ deployment() {
         case $choice in
         1)
             echo "Installing Academic Tools"
-            dnfAcademic=('neovim' 'qalc' 'texlive-scheme-full' 'zathura' 'zathura-pdf-mupdf')
-            flatpakAcademic=('org.libreoffice.LibreOffice' 'nz.mega.MEGAsync' 'org.mozilla.Thunderbird')
-            dnfInstall "${dnfAcademic[@]}"
-            flatpakInstall "${flatpakAcademic[@]}"
+            dnf_academic=('neovim' 'qalc' 'texlive-scheme-full' 'zathura' 'zathura-pdf-mupdf')
+            flatpak_academic=('org.libreoffice.LibreOffice' 'nz.mega.MEGAsync' 'org.mozilla.Thunderbird')
+            dnf_install "${dnf_academic[@]}"
+            flatpak_install "${flatpak_academic[@]}"
             ;;
         2)
             echo "Installing Themes & Configurations"
-            dnfTheming=('papirus-icon-theme')
-            dnfInstall "${dnfTheming[@]}"
+            dnf_theming=('papirus-icon-theme')
+            dnf_install "${dnf_theming[@]}"
             sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
             wget -qO- https://git.io/papirus-folders-install | sh
@@ -66,53 +79,53 @@ deployment() {
             ;;
         3)
             echo "Installing Development Tools"
-            dnfDev=('g++')
-            flatpakDev=('com.visualstudio.code-oss' 'io.qt.QtCreator' 'net.sf.VICE')
+            dnf_dev=('g++')
+            flatpak_dev=('com.visualstudio.code-oss' 'io.qt.QtCreator' 'net.sf.VICE')
             sudo dnf groupinstall "Development Tools" -y
-            dnfInstall "${dnfDev[@]}"
-            flatpakInstall "${flatpakDev[@]}"
+            dnf_install "${dnf_dev[@]}"
+            flatpak_install "${flatpak_dev[@]}"
             ;;
         4)
             echo "Installing Gaming Software"
-            dnfGaming=('lutris' 'steam')
-            dnfInstall "${dnfGaming[@]}"
+            dnf_gaming=('lutris' 'steam')
+            dnf_install "${dnf_gaming[@]}"
             flatpakGaming=('org.openrgb.OpenRGB' 'net.davidotek.pupgui2')
-            flatpakInstall "${flatpakGaming[@]}"
+            flatpak_install "${flatpakGaming[@]}"
             echo "Installing openRGB udev rules"
             wget "https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh"
             chmod +x openrgb-udev-install.sh
             ./openrgb-udev-install.sh
             rm -rf openrgb-udev-install.sh
             ;;
-       
-	 5)
+
+        5)
             echo "Installing General Tools"
-            dnfSys=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'pip' 'ranger' 'unzip' 'zsh')
-            dnfInstall "${dnfSys[@]}"
-	    echo "Changing default shell to ZSH"
+            dnf_general=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'pip' 'ranger' 'unzip' 'zsh')
+            dnf_install "${dnf_general[@]}"
+            echo "Changing default shell to ZSH"
             chsh -s $(which zsh)
-            flatpakSys=('org.bleachbit.BleachBit' 'com.github.tchx84.Flatseal')
-            flatpakInstall "${flatpakSys[@]}"
+            flatpak_general=('org.bleachbit.BleachBit' 'com.github.tchx84.Flatseal')
+            flatpak_install "${flatpak_general[@]}"
             echo "Creating Symlinks To External Storage"
             sudo mkdir ~/Drives/ /mnt/games/ /mnt/media/
             sudo ln -s /mnt/games/Games ~/Drives/Games
             sudo ln -s /mnt/media ~/Drives/Media
             ;;
-   	 6)
+        6)
             echo "Installing Multimedia Software"
             sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel -y
             sudo dnf install lame\* --exclude=lame-devel -y
             sudo dnf group upgrade --with-optional Multimedia -y
-            dnfMedia=('cmus' 'feh' 'mpv' 'mpv-mpris')
-            dnfInstall "${dnfMedia[@]}"
-	    sudo dnf install ffmpeg -y --allowerasing
-            flatpakMedia=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
-            flatpakInstall "${flatpakMedia[@]}"
+            dnf_media=('cmus' 'feh' 'mpv' 'mpv-mpris')
+            dnf_install "${dnf_media[@]}"
+            sudo dnf install ffmpeg -y --allowerasing
+            flatpak_Media=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
+            flatpak_install "${flatpak_Media[@]}"
             ;;
         7)
             echo "Installing Security Tools"
-            dnfSec=('clamav' 'clamd' 'clamav-update' 'nmap')
-            dnfInstall "${dnfSec[@]}"
+            dnf_security=('clamav' 'clamd' 'clamav-update' 'nmap')
+            dnf_install "${dnf_security[@]}"
             sudo setsebool -P antivirus_can_scan_system 1
             sudo systemctl stop clamav-freshclam
             sudo freshclam
@@ -121,14 +134,14 @@ deployment() {
             ;;
         8)
             echo "Installing Virtualization Software"
-            dnfVirt=('bridge-utils' 'dkms' 'kernel-headers' 'kernel-devel' '@virtualization')
-            dnfInstall "${dnfVirt[@]}"
+            dnf_virtualization=('bridge-utils' 'dkms' 'kernel-headers' 'kernel-devel' '@virtualization')
+            dnf_install "${dnf_virtualization[@]}"
             sudo systemctl enable libvirtd
-	    sudo systemctl start libvirtd
-	    sudo usermod -a -G libvirt $USER
-	    sudo sed -i "s|#unix_sock_group|unix_sock_group|" "/etc/libvirt/libvirtd.conf"
-	    sudo sed -i "s|#unix_sock_rw_perms|unix_sock_rw_perms|" "/etc/libvirt/libvirtd.conf"
-	    ;;
+            sudo systemctl start libvirtd
+            sudo usermod -a -G libvirt $USER
+            sudo sed -i "s|#unix_sock_group|unix_sock_group|" "/etc/libvirt/libvirtd.conf"
+            sudo sed -i "s|#unix_sock_rw_perms|unix_sock_rw_perms|" "/etc/libvirt/libvirtd.conf"
+            ;;
         *)
             echo "Invalid choice"
             ;;
@@ -136,9 +149,9 @@ deployment() {
     done
 }
 
-rebootPrompt() {
-    read -p "Deployment Complete. Reboot? (y/n): " rebootChoice
-    if [ "$rebootChoice" = "y" ]; then
+reboot_prompt() {
+    read -p "Deployment Complete. Reboot? (y/n): " reboot_choice
+    if [ "$reboot_choice" = "y" ]; then
         sudo reboot
     else
         echo "Exiting..."
@@ -146,10 +159,4 @@ rebootPrompt() {
     fi
 }
 
-main() {
-    preDeployment
-    deployment
-    rebootPrompt
-}
-
-main
+main "$@"
