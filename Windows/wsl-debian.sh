@@ -42,7 +42,7 @@ deployment() {
             ;;
         2)
             echo "Installing Development Tools"
-            apt_dev=('g++' 'hexedit' 'python')
+            apt_dev=('g++' 'hexedit' 'libssl-dev' 'python')
             apt_install "${apt_dev[@]}"
             ;;
         3)
