@@ -1,5 +1,4 @@
 #! /bin/bash
-# Author: Jacob Niemeir <nniemeir@protonmail.com>
 
 main() {
     pre_deployment
@@ -43,7 +42,7 @@ deployment() {
         2)
             echo "Installing Development Tools"
             apt_dev=('g++' 'hexedit' 'libssl-dev' 'python')
-            apt_install "${apt_dev[@]}"
+            apt_install "${apt_dev[@]}
             ;;
         3)
             echo "Installing General Tools"

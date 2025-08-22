@@ -1,5 +1,4 @@
 #! /bin/bash
-# Author: Jacob Niemeir <nniemeir@protonmail.com>
 
 main() {
     pre_deployment
@@ -62,7 +61,7 @@ deployment() {
         case $choice in
         1)
             echo "Installing Academic Tools"
-            dnf_academic=('neovim' 'qalc' 'texlive-scheme-full' 'zathura' 'zathura-pdf-mupdf')
+            dnf_academic=('neovim' 'pandoc' 'qalc' 'texlive-scheme-full' 'zathura' 'zathura-pdf-mupdf')
             flatpak_academic=('org.libreoffice.LibreOffice' 'nz.mega.MEGAsync' 'org.mozilla.Thunderbird')
             dnf_install "${dnf_academic[@]}"
             flatpak_install "${flatpak_academic[@]}"
@@ -79,8 +78,8 @@ deployment() {
             ;;
         3)
             echo "Installing Development Tools"
-            dnf_dev=('g++')
-            flatpak_dev=('com.visualstudio.code-oss' 'io.qt.QtCreator' 'net.sf.VICE')
+            dnf_dev=('android-tools' 'cargo' 'g++' 'hexedit' 'openssl-devel' 'readline-devel' 'SDL2-devel' 'SDL2_ttf-devel')
+            flatpak_dev=('com.visualstudio.code-oss' 'io.qt.QtCreator')
             sudo dnf groupinstall "Development Tools" -y
             dnf_install "${dnf_dev[@]}"
             flatpak_install "${flatpak_dev[@]}"
@@ -89,8 +88,8 @@ deployment() {
             echo "Installing Gaming Software"
             dnf_gaming=('lutris' 'steam')
             dnf_install "${dnf_gaming[@]}"
-            flatpakGaming=('org.openrgb.OpenRGB' 'net.davidotek.pupgui2')
-            flatpak_install "${flatpakGaming[@]}"
+            flatpak_gaming=('org.openrgb.OpenRGB' 'net.davidotek.pupgui2')
+            flatpak_install "${flatpak_gaming[@]}"
             echo "Installing openRGB udev rules"
             wget "https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh"
             chmod +x openrgb-udev-install.sh
@@ -100,14 +99,14 @@ deployment() {
 
         5)
             echo "Installing General Tools"
-            dnf_general=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'pip' 'ranger' 'unzip' 'zsh')
+            dnf_general=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'light' 'python3-pip' 'ranger' 'unzip' 'zsh')
             dnf_install "${dnf_general[@]}"
             echo "Changing default shell to ZSH"
             chsh -s $(which zsh)
             flatpak_general=('org.bleachbit.BleachBit' 'com.github.tchx84.Flatseal')
             flatpak_install "${flatpak_general[@]}"
             echo "Creating Symlinks To External Storage"
-            sudo mkdir ~/Drives/ /mnt/games/ /mnt/media/
+            sudo mkdir -p ~/Drives/ /mnt/games/ /mnt/media/
             sudo ln -s /mnt/games/Games ~/Drives/Games
             sudo ln -s /mnt/media ~/Drives/Media
             ;;
@@ -116,11 +115,12 @@ deployment() {
             sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel -y
             sudo dnf install lame\* --exclude=lame-devel -y
             sudo dnf group upgrade --with-optional Multimedia -y
-            dnf_media=('cmus' 'feh' 'mpv' 'mpv-mpris')
+            dnf_media=('cmus' 'feh' 'mpc' 'mpd' 'mpv' 'mpv-mpris')
             dnf_install "${dnf_media[@]}"
             sudo dnf install ffmpeg -y --allowerasing
-            flatpak_Media=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
-            flatpak_install "${flatpak_Media[@]}"
+	    cargo install rmpc --locked
+            flatpak_media=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
+            flatpak_install "${flatpak_media[@]}"
             ;;
         7)
             echo "Installing Security Tools"
@@ -138,7 +138,7 @@ deployment() {
             dnf_install "${dnf_virtualization[@]}"
             sudo systemctl enable libvirtd
             sudo systemctl start libvirtd
-            sudo usermod -a -G libvirt $USER
+            sudo usermod -a -G libvirt "$USER"
             sudo sed -i "s|#unix_sock_group|unix_sock_group|" "/etc/libvirt/libvirtd.conf"
             sudo sed -i "s|#unix_sock_rw_perms|unix_sock_rw_perms|" "/etc/libvirt/libvirtd.conf"
             ;;
