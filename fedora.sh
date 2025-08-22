@@ -115,11 +115,11 @@ deployment() {
             sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel -y
             sudo dnf install lame\* --exclude=lame-devel -y
             sudo dnf group upgrade --with-optional Multimedia -y
-            dnf_media=('cmus' 'feh' 'mpc' 'mpd' 'mpv' 'mpv-mpris')
+            dnf_media=('feh' 'mpc' 'mpd' 'mpv' 'mpv-mpris')
             dnf_install "${dnf_media[@]}"
             sudo dnf install ffmpeg -y --allowerasing
 	    cargo install rmpc --locked
-            flatpak_media=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'com.transmissionbt.Transmission' 'org.kde.kdenlive' 'org.musicbrains.Picard')
+            flatpak_media=('ca.littlesvr.asunder' 'io.freetubeapp.FreeTube' 'org.gimp.GIMP' 'com.obsproject.Studio' 'org.kde.kdenlive' 'org.musicbrains.Picard')
             flatpak_install "${flatpak_media[@]}"
             ;;
         7)
