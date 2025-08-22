@@ -68,7 +68,7 @@ deployment() {
             ;;
         2)
             echo "Installing Themes & Configurations"
-            dnf_theming=('papirus-icon-theme')
+            dnf_theming=('fontawesome4-fonts' 'papirus-icon-theme')
             dnf_install "${dnf_theming[@]}"
             sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
@@ -99,7 +99,7 @@ deployment() {
 
         5)
             echo "Installing General Tools"
-            dnf_general=('fontawesome4-fonts' 'fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'light' 'python3-pip' 'ranger' 'unzip' 'zsh')
+            dnf_general=('fzf' 'gvfs' 'gvfs-mtp' 'htop' 'kitty' 'light' 'python3-pip' 'ranger' 'unzip' 'zsh')
             dnf_install "${dnf_general[@]}"
             echo "Changing default shell to ZSH"
             chsh -s $(which zsh)
