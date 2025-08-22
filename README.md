@@ -1,4 +1,4 @@
-# Deployment Scripts
+# Deployment Script
 
 This script automates deployment of my working environment in Fedora Sway 41. More environments may be added in the future if necessary.
 
