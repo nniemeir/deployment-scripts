@@ -1,0 +1,23 @@
+- name: Install development packages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - "@Development Tools"
+      - android-tools
+      - cargo
+      - g++
+      - hexedit
+      - openssl-devel
+      - readline-devel
+      - SDL2_ttf-devel
+      - SDL2-devel
+      - strace
+      - wayland-devel
+      - wlroots-devel
+
+- name: Install development flatpaks
+  community.general.flatpak:
+    name:
+      - com.visualstudio.code-oss
+      - io.qt.QtCreator

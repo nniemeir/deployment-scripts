@@ -1,0 +1,25 @@
+
+- name: Install professional packages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - neovim
+      - pandoc
+      - qalc
+      - texlive-scheme-full
+      - zathura
+      - zathura-pdf-mupdf
+
+- name: Install professional flatpaks
+  community.general.flatpak:
+    name:
+      - nz.mega.MEGAsync
+      - org.libreoffice.LibreOffice
+      - org.mozilla.Thunderbird
+
+- name: Install vim-plug
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    dest: "{{ ansible_env.HOME }}/.local/share/nvim/site/autoload/plug.vim"
+    mode: '0644'

@@ -1,0 +1,34 @@
+- name: Install gaming packages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - lutris
+      - steam
+
+- name: Install gaming flatpaks
+  community.general.flatpak:
+    name:
+      - net.davidotek.pupgui2
+      - org.openrgb.OpenRGB
+
+- name: Install OpenRGB udev rules
+  become: yes
+  shell: |
+    wget -q https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh -O /tmp/openrgb-udev-install.sh
+    chmod +x /tmp/openrgb-udev-install.sh
+    /tmp/openrgb-udev-install.sh
+    rm /tmp/openrgb-udev-install.sh
+
+- name: Create gaming drive mountpoint
+  become: yes
+  ansible.builtin.file:
+    path: "/mnt/games"
+    state: directory
+
+- name: Create gaming drive symlink
+  become: yes
+  ansible.builtin.file:
+    src: /mnt/games/
+    dest: "{{ ansible_user_dir }}/Drives/Games"
+    state: link

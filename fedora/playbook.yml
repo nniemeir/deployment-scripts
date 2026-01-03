@@ -1,0 +1,41 @@
+---
+- name: Fedora Post-Installation Setup
+  hosts: localhost
+  # Facts are system properties that may be needed to run a given playbook.
+  # It is important that we gather facts as the current user in this case so that 
+  # ansible_user_dir will refer to the user's home directory rather than root's
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Include category variables
+      include_vars: vars/main.yml
+
+  roles:
+    - common                     
+
+    - role: development
+      when: install_development | default(true)
+
+    - role: gaming
+      when: install_gaming | default(true)
+
+    - role: general
+      when: install_general | default(true)
+
+    - role: multimedia
+      when: install_multimedia | default(true)
+
+    - role: professional
+      when: install_professional | default(true)
+
+    - role: security
+      when: install_security | default(true)
+
+    - role: theming
+      when: install_theming | default(true)
+
+    - role: virtualization
+      when: install_virtualization | default(true)
+
+# This can be run with the following command:
+# ansible-playbook -i inventory.yml playbook.yml --ask-become-pass

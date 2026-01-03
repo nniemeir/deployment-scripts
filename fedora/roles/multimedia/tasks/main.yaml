@@ -1,0 +1,60 @@
+- name: Install/upgrade multimedia packages and groups
+  become: yes
+  ansible.builtin.dnf:
+    name:
+      - ffmpeg
+      - ffmpeg-libs
+      - gstreamer1-plugin-libav
+      - gstreamer1-plugin-openh264
+      - gstreamer1-plugins-bad-free
+      - gstreamer1-plugins-base
+      - gstreamer1-plugins-good
+      - lame-libs
+    state: present
+    exclude: gstreamer1-plugins-bad-free-devel,lame-devel
+    allowerasing: true
+
+- name: Install/upgrade the Multimedia group
+  become: yes
+  ansible.builtin.dnf:
+    name: "@Multimedia"
+    state: latest
+
+- name: Upgrade all packages
+  become: yes
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install multimedia packages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - feh
+      - mpc
+      - mpd
+      - mpv
+      - mpv-mpris
+
+- name: Install multimedia flatpaks
+  community.general.flatpak:
+    name:
+      - ca.littlesvr.asunder
+      - com.obsproject.Studio
+      - io.freetubeapp.FreeTube
+      - org.gimp.GIMP
+      - org.kde.kdenlive
+
+- name: Create media drive mountpoint
+  become: yes
+  ansible.builtin.file:
+    path: "/mnt/media"
+    state: directory
+
+- name: Create media drive symlink
+  become: yes
+  ansible.builtin.file:
+    src: /mnt/media/
+    dest: "{{ ansible_user_dir }}/Drives/Media"
+    state: link

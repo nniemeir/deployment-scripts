@@ -1,0 +1,40 @@
+- name: Install RPM Fusion free
+  become: yes
+  ansible.builtin.dnf:
+    name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
+    state: present
+
+- name: Install RPM Fusion nonfree
+  become: yes
+  ansible.builtin.dnf:
+    name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
+    state: present
+
+- name: Add the flathub flatpak repository remote to the user installation
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user
+
+- name: Tune DNF configuration
+  become: yes
+  ansible.builtin.blockinfile:
+    path: /etc/dnf/dnf.conf
+    block: |
+      fastestmirror=true
+      deltarpm=true
+      max_parallel_downloads=10
+
+- name: Install deployment prerequisite packages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - flatpak
+      - git
+
+- name: Create drives directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/Drives"
+    state: directory

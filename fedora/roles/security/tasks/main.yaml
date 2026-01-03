@@ -1,0 +1,35 @@
+- name: Install security passages
+  become: yes
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - clamav
+      - clamav-update
+      - clamd
+      - nmap
+
+- name: Allow antivirus scans
+  become: yes
+  seboolean:
+    name: antivirus_can_scan_system
+    state: yes
+    persistent: yes
+
+# clamav has to be stopped to update the database
+- name: Stop freshclam temporarily
+  become: yes
+  service:
+    name: clamav-freshclam
+    state: stopped
+
+# Update the database
+- name: Run freshclam
+  become: yes
+  command: freshclam
+
+- name: Start and enable freshclam
+  become: yes
+  service:
+    name: clamav-freshclam
+    state: started
+    enabled: yes
