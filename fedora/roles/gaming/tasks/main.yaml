@@ -12,13 +12,30 @@
       - net.davidotek.pupgui2
       - org.openrgb.OpenRGB
 
-- name: Install OpenRGB udev rules
+- name: Check if OpenRGB udev rules already exist
+  stat:
+    path: /usr/lib/udev/rules.d/60-openrgb.rules  
+  register: openrgb_rules_present
+
+- name: Download OpenRGB udev installer
   become: yes
-  shell: |
-    wget -q https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh -O /tmp/openrgb-udev-install.sh
-    chmod +x /tmp/openrgb-udev-install.sh
-    /tmp/openrgb-udev-install.sh
-    rm /tmp/openrgb-udev-install.sh
+  get_url:
+    url: https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh
+    dest: /tmp/openrgb-udev-install.sh
+    mode: '0755'
+  when: not openrgb_rules_present.stat.exists
+
+- name: Run OpenRGB udev installer
+  become: yes
+  command: /tmp/openrgb-udev-install.sh
+  when: not openrgb_rules_present.stat.exists
+
+- name: Remove installer script
+  become: yes
+  file:
+    path: /tmp/openrgb-udev-install.sh
+    state: absent
+  when: not openrgb_rules_present.stat.exists
 
 - name: Create gaming drive mountpoint
   become: yes

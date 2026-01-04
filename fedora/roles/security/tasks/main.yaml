@@ -1,3 +1,64 @@
+- name: Ensure firewalld is installed
+  become: yes
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld service enabled and running
+  become: yes
+  systemd:
+    enabled: true
+    state: started
+    name: firewalld
+
+- name: Ensure SELinux enabled and enforcing
+  become: yes
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Harden network parameters
+  become: yes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: '{{ item.value }}'
+    sysctl_set: yes
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/90-net.conf
+  loop:
+   - name: net.ipv4.tcp_syncookies
+     value: 1
+   - name: net.ipv4.conf.default.log_martians
+     value: 1
+   - name: net.ipv4.conf.all.log_martians
+     value: 1
+   - name: net.ipv4.conf.all.accept_source_route
+     value: 0
+   - name: net.ipv4.conf.default.accept_source_route
+     value: 0
+   - name: net.ipv6.conf.all.accept_source_route
+     value: 0
+   - name: net.ipv6.conf.default.accept_source_route
+     value: 0
+
+- name: Harden kernel parameters
+  become: yes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: '{{ item.value }}'
+    sysctl_set: yes
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/90-kernel.conf
+  loop:
+  - name: kernel.randomize_va_space
+    value: 2
+  - name: kernel.dmesg_restrict
+    value: 1
+  - name: kernel.perf_event_paranoid
+    value: 2
+
 - name: Install security passages
   become: yes
   ansible.builtin.dnf:
@@ -15,21 +76,53 @@
     state: yes
     persistent: yes
 
+- name: Check if clamav database needs to update
+  become: yes
+  command: freshclam --checks=0
+  register: freshclam_check
+  changed_when: false
+  failed_when: freshclam_check.rc > 1
+
 # clamav has to be stopped to update the database
 - name: Stop freshclam temporarily
   become: yes
   service:
     name: clamav-freshclam
     state: stopped
+  when: freshclam_check.rc == 1
 
 # Update the database
 - name: Run freshclam
   become: yes
   command: freshclam
+  when: freshclam_check.rc == 1
 
-- name: Start and enable freshclam
+- name: Start freshclam
   become: yes
   service:
     name: clamav-freshclam
     state: started
-    enabled: yes
+  when: freshclam_check.rc == 1
+
+# Disable unneeded services    
+- name: Ensure avahi-daemon service disabled and stopped
+  become: yes
+  systemd:
+    enabled: false
+    state: stopped
+    name: avahi-daemon
+
+- name: Ensure cups service disabled and stopped
+  become: yes
+  systemd:
+    enabled: false
+    state: stopped
+    name: cups
+
+- name: Ensure ModemManager service disabled and stopped
+  become: yes
+  systemd:
+    enabled: false
+    state: stopped
+    name: ModemManager
+
