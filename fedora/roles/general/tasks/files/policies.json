@@ -1,0 +1,62 @@
+{
+    "policies": {
+        "DisableFirefoxAccounts": true,
+        "DisableFirefoxStudies": true,
+        "DisableFormHistory": true,
+        "DisablePasswordReveal": true,
+        "DisablePocket": true,
+        "DisableTelemetry": true,
+        "EnableTrackingProtection": true,
+        "HttpsOnlyMode": true,
+        "OverrideFirstRunPage": true,
+        "OverridePostUpdatePage": true,
+        "SanitizeOnShutdown": true,
+
+        "Homepage": {
+            "URL": "https://nniemeir.github.io/",
+            "Locked": false,
+            "StartPage": "homepage"
+        },
+        "NewTabPage": {
+            "URL": "about:blank"
+        },
+        
+        "SearchEngines": {
+            "Default": "DuckDuckGo"
+        },
+        "SearchSuggestEnabled": false,
+        
+        "ExtensionSettings": {
+            "*": {
+                "installation_mode": "blocked"
+            },
+            "addon@darkreader.org": {
+                "installation_mode": "allowed"
+            },
+            "jid1-q4sG8pYhq8KGHs@jetpack": {
+                "installation_mode": "allowed"
+            },
+            "jid1-MnnxcxisBPnSXQ@jetpack": {
+                "installation_mode": "allowed"
+            },
+            "uBlock0@raymondhill.net": {
+                "installation_mode": "allowed"
+            }
+        },
+        "Extensions": {
+            "Install": [
+            "https://addons.mozilla.org/firefox/downloads/file/4171020/ublock_origin-1.52.2.xpi",
+            "https://addons.mozilla.org/firefox/downloads/file/4510595/adblock_for_youtube-0.5.3.xpi",
+            "https://addons.mozilla.org/firefox/downloads/file/4638146/darkreader-4.9.118.xpi",
+            "https://addons.mozilla.org/firefox/downloads/file/4638816/privacy_badger17-2025.12.9.xpi"
+        ]
+        },
+        
+        "Preferences": {
+            "network.cookie.cookieBehavior": 4,
+            "network.http.referer.XOriginPolicy": 2,
+            "network.http.referer.XOriginTrimmingPolicy": 2,
+            "privacy.resistFingerprinting": true
+        }
+    }
+}
