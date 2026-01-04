@@ -1,6 +1,6 @@
-# Deployment Script
+# Deployment Scripts
 
-This script automates deployment of my working environment in Fedora Sway 41. More environments may be added in the future if necessary.
+These scripts and playbooks automate deployment of my working environment in Fedora Sway 41, Windows 11, and WSL Debian. More environments may be added in the future if necessary.
 
 ## Features
 ### Fedora
@@ -14,13 +14,21 @@ This script automates deployment of my working environment in Fedora Sway 41. Mo
 | Category      | Examples      |
 | ------------- | ------------- |
 | Academic  | LibreOffice, Pandoc, Qalculate, TeX Live |
-| Customization  | Papirus Icon Theme, vim-plug  |
 | Development  | android-tools, cargo, Qt Creator, VS Code  |
 | Gaming  | Lutris, ProtonUp-Qt, Steam |
 | General  | fzf, kitty, ranger, zsh |
 | Multimedia  | GIMP, feh, mpv, OBS |
 | Security  | clamav, nmap |
+| Theming  | Papirus Icon Theme, vim-plug  |
 | Virtualization  | kernel-headers, kernel-devel, @virtualization |
+
+* Creates symlinks in user's home directory to game and media drive mountpoints
+* Ensures basic security:
+  * SELinux enabled and enforcing
+  * Hardens some kernel and network parameters
+  * Installs clamav and enable its service
+* Disables avahi-daemon, cups, and ModemManager
+* Installs a hardened Firefox policies.json
 
 ### Windows 11
 * Removes 40+ unnecessary packages
@@ -29,11 +37,11 @@ This script automates deployment of my working environment in Fedora Sway 41. Mo
 | Category      | Examples      |
 | ------------- | ------------- |
 | Academic  | LibreOffice, Qalculate, TeX Live |
-| Customization  | AutoHotKey, TranslucentTB, OpenRGB  |
 | Development  | Git, Python, VS Code |
 | Gaming  | Discord, Steam |
 | General  | fzf, PowerToys, Transmission|
 | Multimedia  | FreeTube, GIMP, mpv, OBS |
+| Theming  | AutoHotKey, TranslucentTB, OpenRGB |
 | Virtualization  | VirtualBox |
 
 * Installs Chocolately and mpvio with it
