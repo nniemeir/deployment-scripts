@@ -126,3 +126,35 @@
     state: stopped
     name: ModemManager
 
+- name: Create Firefox policies directory
+  become: yes
+  ansible.builtin.file:
+    path: "/etc/firefox/policies"
+    state: directory
+
+- name: Copy Firefox policies
+  become: yes
+  copy: 
+    src=policies.json
+    dest=/etc/firefox/policies/policies.json 
+    owner=root 
+    group=root 
+    mode=0644
+
+- name: Copy Auditd rules
+  become: yes
+  copy: 
+    src=audit.rules
+    dest=/etc/audit/rules.d/audit.rules
+    owner=root 
+    group=root 
+    mode=0640
+
+- name: Clear existing rules to avoid conflict
+  become: yes
+  ansible.builtin.command: auditctl -D
+
+- name: Reload Auditd rules
+  become: yes
+  ignore_errors: true 
+  ansible.builtin.command: augenrules --load 

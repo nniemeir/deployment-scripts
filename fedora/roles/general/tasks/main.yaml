@@ -19,18 +19,3 @@
   user:
     name: "{{ ansible_user_id }}"
     shell: /usr/bin/zsh
-
-- name: Create Firefox policies directory
-  become: yes
-  ansible.builtin.file:
-    path: "/etc/firefox/policies"
-    state: directory
-
-- name: Copy Firefox policies
-  become: yes
-  copy: 
-    src=policies.json
-    dest=/etc/firefox/policies/policies.json 
-    owner=root 
-    group=root 
-    mode=0644
