@@ -1,24 +1,24 @@
 - name: Ensure firewalld is installed
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: firewalld
     state: present
 
 - name: Ensure firewalld service enabled and running
-  become: yes
+  become: true
   systemd:
     enabled: true
     state: started
     name: firewalld
 
 - name: Ensure SELinux enabled and enforcing
-  become: yes
+  become: true
   ansible.posix.selinux:
     policy: targeted
     state: enforcing
 
 - name: Harden network parameters
-  become: yes
+  become: true
   ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: '{{ item.value }}'
@@ -41,9 +41,21 @@
      value: 0
    - name: net.ipv6.conf.default.accept_source_route
      value: 0
+   - name: net.ipv4.conf.all.rp_filter
+     value: 1  
+   - name: net.ipv4.conf.default.rp_filter
+     value: 1
+   - name: net.ipv4.icmp_echo_ignore_broadcasts
+     value: 1
+   - name: net.ipv4.conf.all.send_redirects
+     value: 0
+   - name: net.ipv4.conf.default.send_redirects
+     value: 0
+   - name: net.ipv6.conf.default.accept_ra
+     value: 0
 
 - name: Harden kernel parameters
-  become: yes
+  become: true
   ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: '{{ item.value }}'
@@ -58,82 +70,83 @@
     value: 1
   - name: kernel.perf_event_paranoid
     value: 2
+  - name: kernel.kptr_restrict
+    value: 2  
+  - name: kernel.unprivileged_bpf_disabled
+    value: 1  
+  - name: fs.protected_symlinks
+    value: 1
+  - name: fs.protected_hardlinks
+    value: 1
+  - name: fs.suid_dumpable
+    value: 0
 
-- name: Install security passages
-  become: yes
+- name: Install security packages
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
       - clamav
       - clamav-update
-      - clamd
       - nmap
 
+- name: Ensure clamd not installed
+  become: true
+  ansible.builtin.dnf:
+    state: absent
+    name:
+      - clamd
+
 - name: Allow antivirus scans
-  become: yes
+  become: true
   seboolean:
     name: antivirus_can_scan_system
     state: yes
     persistent: yes
 
 - name: Check if clamav database needs to update
-  become: yes
+  become: true
   command: freshclam --checks=0
   register: freshclam_check
   changed_when: false
   failed_when: freshclam_check.rc > 1
 
-# clamav has to be stopped to update the database
-- name: Stop freshclam temporarily
-  become: yes
-  service:
-    name: clamav-freshclam
-    state: stopped
-  when: freshclam_check.rc == 1
-
 # Update the database
 - name: Run freshclam
-  become: yes
+  become: true
   command: freshclam
-  when: freshclam_check.rc == 1
-
-- name: Start freshclam
-  become: yes
-  service:
-    name: clamav-freshclam
-    state: started
   when: freshclam_check.rc == 1
 
 # Disable unneeded services    
 - name: Ensure avahi-daemon service disabled and stopped
-  become: yes
+  become: true
   systemd:
     enabled: false
     state: stopped
     name: avahi-daemon
 
 - name: Ensure cups service disabled and stopped
-  become: yes
+  become: true
   systemd:
     enabled: false
     state: stopped
     name: cups
 
 - name: Ensure ModemManager service disabled and stopped
-  become: yes
+  become: true
   systemd:
     enabled: false
     state: stopped
     name: ModemManager
 
 - name: Create Firefox policies directory
-  become: yes
+  become: true
   ansible.builtin.file:
     path: "/etc/firefox/policies"
     state: directory
 
 - name: Copy Firefox policies
-  become: yes
+  become: true
   copy: 
     src=policies.json
     dest=/etc/firefox/policies/policies.json 
@@ -141,8 +154,17 @@
     group=root 
     mode=0644
 
+- name: Copy Auditd config
+  become: true
+  copy: 
+    src=auditd.conf
+    dest=/etc/audit/auditd.conf
+    owner=root 
+    group=root 
+    mode=0640
+
 - name: Copy Auditd rules
-  become: yes
+  become: true
   copy: 
     src=audit.rules
     dest=/etc/audit/rules.d/audit.rules
@@ -150,11 +172,7 @@
     group=root 
     mode=0640
 
-- name: Clear existing rules to avoid conflict
-  become: yes
-  ansible.builtin.command: auditctl -D
-
 - name: Reload Auditd rules
-  become: yes
+  become: true
   ignore_errors: true 
   ansible.builtin.command: augenrules --load 

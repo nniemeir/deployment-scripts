@@ -1,5 +1,5 @@
 - name: Install gaming packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
@@ -18,7 +18,7 @@
   register: openrgb_rules_present
 
 - name: Download OpenRGB udev installer
-  become: yes
+  become: true
   get_url:
     url: https://openrgb.org/releases/release_0.9/openrgb-udev-install.sh
     dest: /tmp/openrgb-udev-install.sh
@@ -26,25 +26,25 @@
   when: not openrgb_rules_present.stat.exists
 
 - name: Run OpenRGB udev installer
-  become: yes
+  become: true
   command: /tmp/openrgb-udev-install.sh
   when: not openrgb_rules_present.stat.exists
 
 - name: Remove installer script
-  become: yes
+  become: true
   file:
     path: /tmp/openrgb-udev-install.sh
     state: absent
   when: not openrgb_rules_present.stat.exists
 
 - name: Create gaming drive mountpoint
-  become: yes
+  become: true
   ansible.builtin.file:
     path: "/mnt/games"
     state: directory
 
 - name: Create gaming drive symlink
-  become: yes
+  become: true
   ansible.builtin.file:
     src: /mnt/games/
     dest: "{{ ansible_user_dir }}/Drives/Games"

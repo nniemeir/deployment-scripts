@@ -1,5 +1,5 @@
 - name: Install general packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:

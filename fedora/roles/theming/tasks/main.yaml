@@ -1,5 +1,5 @@
 - name: Install theming packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
@@ -7,7 +7,7 @@
       - papirus-icon-theme
 
 - name: Install papirus folders script
-  become: yes
+  become: true
   ansible.builtin.shell: wget -qO- https://git.io/papirus-folders-install | sh
   args:
     creates: /usr/share/icons/Papirus

@@ -1,5 +1,5 @@
 - name: Install virtualization packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
@@ -10,21 +10,21 @@
       - kernel-headers
 
 - name: Enable and start libvirtd
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: libvirtd
     enabled: yes
     state: started
 
 - name: Enable unix_sock_group
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/libvirt/libvirtd.conf
     regexp: '^#?unix_sock_group'
     line: 'unix_sock_group = "libvirt"'
 
 - name: Add user to libvirt group
-  become: yes
+  become: true
   user:
     name: "{{ ansible_user_id }}"
     groups: libvirt

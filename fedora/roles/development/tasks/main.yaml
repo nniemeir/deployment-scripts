@@ -1,5 +1,5 @@
 - name: Install development packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
@@ -9,10 +9,12 @@
       - g++
       - hexedit
       - openssl-devel
+      - perf
       - readline-devel
       - SDL2_ttf-devel
       - SDL2-devel
       - strace
+      - valgrind
       - wayland-devel
       - wlroots-devel
 

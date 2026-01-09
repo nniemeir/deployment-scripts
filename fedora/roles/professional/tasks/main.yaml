@@ -1,6 +1,6 @@
 
 - name: Install professional packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:

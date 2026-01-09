@@ -1,3 +1,30 @@
+## Delete existing rules
+-D
+
+## Increase buffer size for busy systems
+-b 8192
+
+## Failure mode: 1 = printk (log failure), 2 = panic (halt system)
+-f 1
+
+# Monitor kernel module operations
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module,delete_module -k modules
+
+# Monitor account modifications
+-w /usr/sbin/useradd -p x -k user_modification
+-w /usr/sbin/userdel -p x -k user_modification
+-w /usr/sbin/usermod -p x -k user_modification
+-w /usr/sbin/groupadd -p x -k group_modification
+-w /usr/sbin/groupdel -p x -k group_modification
+-w /usr/sbin/groupmod -p x -k group_modification
+
+# Monitor sudo usage
+-w /etc/sudoers -p wa -k sudoers
+-w /etc/sudoers.d/ -p wa -k sudoers
+
 # Monitor user/group information files
 -w /etc/passwd -k ug_info -p wa
 -w /etc/group -k ug_info -p rwa
@@ -31,13 +58,13 @@
 -w /etc/securetty -p wa
 
 # Monitor logins
--w /var/log/lastlog -p wa
+# -w /var/log/lastlog -p wa
 
 # Monitor changes to DNS hosts file
 -w /etc/hosts -p wa
 
 # Monitor changes to service scripts dir
--w /etc/init.d/
+-w /usr/lib/systemd/system/
 
 # Monitor changes to dynamic library paths
 -w /etc/ld.so.conf -p wa
@@ -97,4 +124,5 @@
 # Monitor superuser looking in other home directories (Copied from documentation)
 -a always,exit -F dir=/home -F uid=0 -F auid>=1000 -F auid!=unset -C auid!=obj_uid -F key=power-abuse
 
-
+# Lock configuration from being changed
+-e 2

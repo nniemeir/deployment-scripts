@@ -1,11 +1,11 @@
 - name: Install RPM Fusion free
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
     state: present
 
 - name: Install RPM Fusion nonfree
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
     state: present
@@ -18,7 +18,7 @@
     method: user
 
 - name: Tune DNF configuration
-  become: yes
+  become: true
   ansible.builtin.blockinfile:
     path: /etc/dnf/dnf.conf
     block: |
@@ -27,7 +27,7 @@
       max_parallel_downloads=10
 
 - name: Install deployment prerequisite packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:

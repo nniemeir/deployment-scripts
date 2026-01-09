@@ -1,5 +1,5 @@
 - name: Install/upgrade multimedia packages and groups
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name:
       - ffmpeg
@@ -15,19 +15,19 @@
     allowerasing: true
 
 - name: Install/upgrade the Multimedia group
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: "@Multimedia"
     state: latest
 
 - name: Upgrade all packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: "*"
     state: latest
 
 - name: Install multimedia packages
-  become: yes
+  become: true
   ansible.builtin.dnf:
     state: present
     name:
@@ -47,13 +47,13 @@
       - org.kde.kdenlive
 
 - name: Create media drive mountpoint
-  become: yes
+  become: true
   ansible.builtin.file:
     path: "/mnt/media"
     state: directory
 
 - name: Create media drive symlink
-  become: yes
+  become: true
   ansible.builtin.file:
     src: /mnt/media/
     dest: "{{ ansible_user_dir }}/Drives/Media"
