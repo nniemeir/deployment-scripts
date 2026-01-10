@@ -1,3 +1,5 @@
+# RPM Fusion provides multimedia codecs and drivers that are not included in the standard repositories for licensing reasons.
+# There are two Fusion repositories, free (FOSS) and nonfree (Proprietary)
 - name: Install RPM Fusion free
   become: true
   ansible.builtin.dnf:
@@ -10,13 +12,10 @@
     name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
     state: present
 
-- name: Add the flathub flatpak repository remote to the user installation
-  community.general.flatpak_remote:
-    name: flathub
-    state: present
-    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-    method: user
-
+# DNF performance tuning for faster package management
+# fastestmirror selects the fastest mirror based on connection speed
+# deltarpm downloads only the differences between package versions to save bandwidth
+# max_parallel_downloads increases concurrent downloads from the default of 3 to 10
 - name: Tune DNF configuration
   become: true
   ansible.builtin.blockinfile:
@@ -26,14 +25,27 @@
       deltarpm=true
       max_parallel_downloads=10
 
+# Base packages required for the rest of the playbook to functionw
 - name: Install deployment prerequisite packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
-      - flatpak
-      - git
+      - flatpak # Application sandboxing and distribution system
+      - git     # Version control system, needed for cloning repositories
 
+# Flathub is the primary repository for Flatpak applications
+# We install it at the user-level so that we don't need root for app management
+- name: Add the flathub flatpak repository remote to the user installation
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user # Installs to ~/.local/share/flatpak instead of /var/lib/flatpak
+
+
+# Creates a consistent location for our mountpoint sysmlinks
+# ansible_user_dir ensures that we create the directory in the user's home instead of root's
 - name: Create drives directory
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/Drives"

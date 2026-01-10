@@ -1,21 +1,32 @@
+# Complete KVM/QEMU virtualization stack setup
+# Provides support for hardware-accelerated virtual machines
 - name: Install virtualization packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Includes common tools like qemu and libvirt
       - "@virtualization"
+      # Utilities for managing network bridges
       - bridge-utils
+      # Dynamic Kernel Module Support
+      # This automatically rebuilds kernel modules related to virtualization on kernel update
       - dkms
+      # Development headers for the running kernel
+      # Required to build kernel modules
       - kernel-devel
       - kernel-headers
 
+# Libvirtd manages virtual machines
+# We interface with it via virt-manager and virsh
 - name: Enable and start libvirtd
   become: true
   ansible.builtin.systemd:
     name: libvirtd
-    enabled: yes
+    enabled: yes # Start on boot
     state: started
 
+# Configure libvirt to allow access via the 'libvirt' group rather than just root
 - name: Enable unix_sock_group
   become: true
   ansible.builtin.lineinfile:
@@ -23,9 +34,11 @@
     regexp: '^#?unix_sock_group'
     line: 'unix_sock_group = "libvirt"'
 
+# Avoid needing sudo for ever virsh/virt-manager operation
+# The user will have to log out and back in for this to take effect
 - name: Add user to libvirt group
   become: true
   user:
-    name: "{{ ansible_user_id }}"
+    name: "{{ ansible_user_id }}" 
     groups: libvirt
-    append: yes
+    append: yes # Add to libvirtd without removing from other groups

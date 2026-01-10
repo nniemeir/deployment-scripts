@@ -1,19 +1,31 @@
+# Multimedia codec installation
 - name: Install/upgrade multimedia packages and groups
   become: true
   ansible.builtin.dnf:
     name:
+      # Handles the majority of audio/video encoding and decoding
       - ffmpeg
       - ffmpeg-libs
+      # GStreamer plugin for libav, provides broad format support in GNOME apps
       - gstreamer1-plugin-libav
+      # H.264 codec support
       - gstreamer1-plugin-openh264
+      # Additional GStreamer plugins
       - gstreamer1-plugins-bad-free
+      # Base GStreamer plugins
       - gstreamer1-plugins-base
+      # Common format support
       - gstreamer1-plugins-good
+      # MP3 encoding libraries
       - lame-libs
     state: present
+    # I don't need the development packages
     exclude: gstreamer1-plugins-bad-free-devel,lame-devel
+    # Allow DNF to remove conflicting packages if necessary
+    # This is essential as some of these packages will be replacing the builtin versions
     allowerasing: true
 
+# Ensure that all multimedia packages are fully up to date
 - name: Install/upgrade the Multimedia group
   become: true
   ansible.builtin.dnf:
@@ -26,32 +38,47 @@
     name: "*"
     state: latest
 
+# Core multimedia applications for media playback
 - name: Install multimedia packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Minimal image viewer
       - feh
+      # Music Player Daemon client
       - mpc
+      # Music Player Daemon
       - mpd
+      # Minimal video player
       - mpv
+      # MPRIS plugin for MPV to support media keys
       - mpv-mpris
 
+# Graphical multimedia applications
 - name: Install multimedia flatpaks
   community.general.flatpak:
     name:
+      # CD ripper
       - ca.littlesvr.asunder
+      # Professional streaming and recording software
       - com.obsproject.Studio
+      # Privacy-focused YouTube client
+      # Well suited to distraction-free workflows
       - io.freetubeapp.FreeTube
+      # Image editing suite
       - org.gimp.GIMP
+      # Professional video editing tool
       - org.kde.kdenlive
 
+# Dedicated mount poiint for media HDD
 - name: Create media drive mountpoint
   become: true
   ansible.builtin.file:
     path: "/mnt/media"
     state: directory
 
+# Convenient symlink for accessing media drive from home directory
 - name: Create media drive symlink
   become: true
   ansible.builtin.file:

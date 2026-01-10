@@ -1,18 +1,34 @@
+# Essential system utilities
 - name: Install general packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Fuzzy finder - command-line tool for interactive filtering of lists
+      # I have MANY scripts that depend on this
       - fzf
+      # GNOME Virtual File System - enables mounting remote filesystems
       - gvfs
+      # Media Transfer Protocol for gvfs
+      # This lets us mount Android devices as filesystems
       - gvfs-mtp
+      # Interactive process viewer
+      # Like top, but looks nicer
       - htop
+      # GPU-accelerated terminal emulator
+      # Especially useful for its image viewing protocol
       - kitty
+      # Userspace tool for controlling keyboard backlights
       - light
+      # Python package manager
       - python3-pip
+      # CLI file manager with vim-like keybindings
       - ranger
+      # RAR archive extraction utility
       - unrar
+      # ZIP archive extraction utility
       - unzip
+      # Z Shell, used for its superior auto-completion compared to bash
       - zsh
 
 - name: Change default shell to ZSH

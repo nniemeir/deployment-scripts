@@ -1,25 +1,43 @@
+# Tools that I use consistently in my development environment
 - name: Install development packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Group containing common build tools like gcc and make
       - "@Development Tools"
+      # Android debuigging and device communication
       - android-tools
+      # Rust toolchain
       - cargo
+      # GNU C++ compiler
       - g++
+      # Binary file editor, primarily used for reverse engineering
       - hexedit
+      # Development headers for OpenSSL, required to compile many networking applications
       - openssl-devel
+      # Linux profiling tool
       - perf
+      # Development headers for GNU readline, used for line editing in many CLI apps
       - readline-devel
-      - SDL2_ttf-devel
+      # Simple DirectMedia Layer
       - SDL2-devel
+      # SDL2 TrueType font support, required to compile some games
+      - SDL2_ttf-devel
+      # System call tracer, used for debugging and reverse engineering
       - strace
+      # Memory debugging and leak detection tool, essential for C development
       - valgrind
+      # Development libraries for Wayland compositors
       - wayland-devel
+      # Modular Wayland compositor library, needed to compile my tinywl fork
       - wlroots-devel
 
+# Graphical development applications
 - name: Install development flatpaks
   community.general.flatpak:
     name:
+      # Open source build of Visual Studio Code IDE
       - com.visualstudio.code-oss
+      # IDE for Qt framework development
       - io.qt.QtCreator

@@ -1,22 +1,29 @@
+# Gaming setup via Wine/Proton compatibility layers
 - name: Install gaming packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Open-source gaming platform for managing both Wine/Proton and native games
       - lutris
+      # I know you already know what Steam is
       - steam
 
 - name: Install gaming flatpaks
   community.general.flatpak:
     name:
+      # ProtonUp-Qt - GUI for managing Proton-GE and Wine-GE compatibility tools
       - net.davidotek.pupgui2
+      # Open source RGB lighting control
       - org.openrgb.OpenRGB
 
+# Avoids downloading the rules if we already have them installed
 - name: Check if OpenRGB udev rules already exist
   stat:
     path: /usr/lib/udev/rules.d/60-openrgb.rules  
   register: openrgb_rules_present
 
+# OpenRGB requires udev rules to access RGB controllers without root privileges
 - name: Download OpenRGB udev installer
   become: true
   get_url:
@@ -25,11 +32,13 @@
     mode: '0755'
   when: not openrgb_rules_present.stat.exists
 
+# Executes the script to install the udev rules and reload udev
 - name: Run OpenRGB udev installer
   become: true
   command: /tmp/openrgb-udev-install.sh
   when: not openrgb_rules_present.stat.exists
 
+# Clean up temporary file
 - name: Remove installer script
   become: true
   file:
@@ -37,12 +46,14 @@
     state: absent
   when: not openrgb_rules_present.stat.exists
 
+# Create mountpoint for games SSD
 - name: Create gaming drive mountpoint
   become: true
   ansible.builtin.file:
     path: "/mnt/games"
     state: directory
 
+# Allow easier access to game SSD via a symlink in the user's home directory
 - name: Create gaming drive symlink
   become: true
   ansible.builtin.file:

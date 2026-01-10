@@ -1,9 +1,14 @@
+# System hardening procedure 
+# Primarily based on CIS benchmarks and NIST guidelines
+
+# Provides dynamic firewall management with zone-based rules
 - name: Ensure firewalld is installed
   become: true
   ansible.builtin.dnf:
     name: firewalld
     state: present
 
+# Enable firewall at boot and ensure it's currently running
 - name: Ensure firewalld service enabled and running
   become: true
   systemd:
@@ -11,12 +16,16 @@
     state: started
     name: firewalld
 
+# Security-Enhanced Linux provides mandatory access control (MAC)
+# Enforcing mode actively blocks policy violations
+# Permissive mode would only log violations
 - name: Ensure SELinux enabled and enforcing
   become: true
   ansible.posix.selinux:
     policy: targeted
     state: enforcing
 
+# Network hardening based on CIS benchmark recommendations
 - name: Harden network parameters
   become: true
   ansible.posix.sysctl:
@@ -27,12 +36,17 @@
     reload: yes
     sysctl_file: /etc/sysctl.d/90-net.conf
   loop:
+   # Enable SYN cookies to mitigate SYN flood DoS attacks
    - name: net.ipv4.tcp_syncookies
      value: 1
+   # Log packets from impossible addresses
+   # This helps us detect network attacks
    - name: net.ipv4.conf.default.log_martians
      value: 1
    - name: net.ipv4.conf.all.log_martians
      value: 1
+   # Disable source routing
+   # This helps prevent IP spoofing attacks
    - name: net.ipv4.conf.all.accept_source_route
      value: 0
    - name: net.ipv4.conf.default.accept_source_route
@@ -41,19 +55,26 @@
      value: 0
    - name: net.ipv6.conf.default.accept_source_route
      value: 0
+   # Enable reverse path filtering to help prevent IP spoofing
+   # This drops packets claiming to be from unreachable networks
    - name: net.ipv4.conf.all.rp_filter
      value: 1  
    - name: net.ipv4.conf.default.rp_filter
      value: 1
+   # Ignore ping requests, this prevents smurf attacks
    - name: net.ipv4.icmp_echo_ignore_broadcasts
      value: 1
+   # Disable ICMP redirects to prevent man-in-the-middle attacks
+   # Attackers could redirect traffic through malicious routers
    - name: net.ipv4.conf.all.send_redirects
      value: 0
    - name: net.ipv4.conf.default.send_redirects
      value: 0
+   # Disable IPv6 router advertisements
    - name: net.ipv6.conf.default.accept_ra
      value: 0
 
+# Kernel-level hardening to prevent information leaks and privilege escalation
 - name: Harden kernel parameters
   become: true
   ansible.posix.sysctl:
@@ -64,32 +85,46 @@
     reload: yes
     sysctl_file: /etc/sysctl.d/90-kernel.conf
   loop:
+  # Full ALSR (Address Space Layout Randomization)
+  # Prevents memory exploits by randomizing memory locations of executables, libraries, stack, heap
   - name: kernel.randomize_va_space
     value: 2
+  # Restrict kernel ring buffer viewing to root
+  # Kernel logs can contain sensitive information
   - name: kernel.dmesg_restrict
     value: 1
+  # Restrict perf event monitoring to root for the same reason
   - name: kernel.perf_event_paranoid
     value: 2
+  # Hide kernel pointers in /proc to prevent kernel address leaks
   - name: kernel.kptr_restrict
     value: 2  
+  # Disable unprivileged Berkeley Packet Filter
   - name: kernel.unprivileged_bpf_disabled
     value: 1  
+  # Protect against symlink/hardlink attacks in world-writable directories
   - name: fs.protected_symlinks
     value: 1
   - name: fs.protected_hardlinks
     value: 1
+  # Disable core dumps in setuid programs
   - name: fs.suid_dumpable
     value: 0
 
+# Antivirus tools
 - name: Install security packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Open-source malware detection tool
       - clamav
+      # FreshClam updates virus definitions
       - clamav-update
+      # Network scanner, highly useful for security auditing
       - nmap
 
+# ClamAV's daemon is not needed for on-demand scanning
 - name: Ensure clamd not installed
   become: true
   ansible.builtin.dnf:
@@ -97,6 +132,7 @@
     name:
       - clamd
 
+# Allow Clamav to access the entire filesystem for scanning
 - name: Allow antivirus scans
   become: true
   seboolean:
@@ -104,6 +140,8 @@
     state: yes
     persistent: yes
 
+# Check if virus database outdated before attempting update
+# Freshclam returns 1 if update needed, 0 if not
 - name: Check if clamav database needs to update
   become: true
   command: freshclam --checks=0
@@ -111,13 +149,14 @@
   changed_when: false
   failed_when: freshclam_check.rc > 1
 
-# Update the database
+# Update database if needed
 - name: Run freshclam
   become: true
   command: freshclam
   when: freshclam_check.rc == 1
 
-# Disable unneeded services    
+# Disable unneeded services to reduce attack surface
+# Avahi is an implementation of Apple's Zeroconf protocol suite for discovery of devices on LAN     
 - name: Ensure avahi-daemon service disabled and stopped
   become: true
   systemd:
@@ -125,6 +164,7 @@
     state: stopped
     name: avahi-daemon
 
+# CUPS printing system, unneeded if you don't have a printer
 - name: Ensure cups service disabled and stopped
   become: true
   systemd:
@@ -132,6 +172,7 @@
     state: stopped
     name: cups
 
+# ModemManager, unneeded unless using cellular modem
 - name: Ensure ModemManager service disabled and stopped
   become: true
   systemd:
@@ -139,12 +180,16 @@
     state: stopped
     name: ModemManager
 
+# Firefox Enterprise policies enforce browser settings
+# This is a system-wide configuration that users cannot override
 - name: Create Firefox policies directory
   become: true
   ansible.builtin.file:
     path: "/etc/firefox/policies"
     state: directory
 
+# Deploy my hardened Firefox configuration
+# Disables telemetry, enforces HTTPS, and enables tracking protection amongst other things
 - name: Copy Firefox policies
   become: true
   copy: 
@@ -154,6 +199,8 @@
     group=root 
     mode=0644
 
+# Auditd configuration, controls log rotation and behavior
+# Prevents audit logs from filling the disk
 - name: Copy Auditd config
   become: true
   copy: 
@@ -161,8 +208,10 @@
     dest=/etc/audit/auditd.conf
     owner=root 
     group=root 
-    mode=0640
+    mode=0640 # Readble only by root/audit group
 
+# Comprehensive audit rules for system monitoring
+# Tracks file modifications, privilege escalation, and other suspicious activity
 - name: Copy Auditd rules
   become: true
   copy: 
@@ -172,6 +221,9 @@
     group=root 
     mode=0640
 
+# Load new audit rules into active kernel
+# ignore_errors is needed because rules contain -e 2, 
+# which prevents reloading without reboot after first run
 - name: Reload Auditd rules
   become: true
   ignore_errors: true 

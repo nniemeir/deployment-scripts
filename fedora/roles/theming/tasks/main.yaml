@@ -1,13 +1,18 @@
+# Visual customization packages
 - name: Install theming packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Icon font I use occasionally in status bars
       - fontawesome4-fonts
+      # Popular icon theme
       - papirus-icon-theme
 
+# Allows customization of folder colors for Papirus theme
 - name: Install papirus folders script
   become: true
   ansible.builtin.shell: wget -qO- https://git.io/papirus-folders-install | sh
   args:
+    # Only run this if the theme is not installed already
     creates: /usr/share/icons/Papirus

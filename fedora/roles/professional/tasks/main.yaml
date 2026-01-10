@@ -1,23 +1,35 @@
-
+# Professional productivity and document creation tools
 - name: Install professional packages
   become: true
   ansible.builtin.dnf:
     state: present
     name:
+      # Neovim, a modern Vim fork 
       - neovim
+      # Universal document converter
       - pandoc
+      # Qalculate, an extensive CLI calculator
       - qalc
+      # Professional typesetting system
+      # Used for writing academic papers
       - texlive-scheme-full
+      # Minimal PDF viewer
       - zathura
+      # MuPDF backend, which provides actual PDF rendering
       - zathura-pdf-mupdf
 
+# Graphical professional applications
 - name: Install professional flatpaks
   community.general.flatpak:
     name:
+      # Cloud storage sync client
       - nz.mega.MEGAsync
+      # FOSS alternative to Microsoft Office suite
       - org.libreoffice.LibreOffice
+      # FOSS email client
       - org.mozilla.Thunderbird
 
+# A plugin manager for NeoVim
 - name: Install vim-plug
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
