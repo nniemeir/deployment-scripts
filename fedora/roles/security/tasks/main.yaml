@@ -228,3 +228,14 @@
   become: true
   ignore_errors: true 
   ansible.builtin.command: augenrules --load 
+
+# Copy hosts file, this is a fork of Steven Black's version
+# It blocks malware, social media, and news networks for a distraction-free environment
+- name: Copy hosts file
+  become: true
+  copy: 
+    src=hosts
+    dest=/etc/hosts
+    owner=root 
+    group=root 
+    mode=0644
