@@ -29,6 +29,7 @@ These scripts and playbooks automate deployment of my working environment in Fed
   * Installs clamav and enable its service
 * Disables avahi-daemon, cups, and ModemManager
 * Installs a hardened Firefox policies.json
+* Installs Steven Black's Unified hosts + fakenews + social [hosts file](https://github.com/StevenBlack/hosts) with a few additions of my own
 
 ### Windows 11
 * Removes 40+ unnecessary packages
