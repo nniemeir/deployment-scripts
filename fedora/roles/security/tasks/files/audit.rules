@@ -123,6 +123,3 @@
 
 # Monitor superuser looking in other home directories (Copied from documentation)
 -a always,exit -F dir=/home -F uid=0 -F auid>=1000 -F auid!=unset -C auid!=obj_uid -F key=power-abuse
-
-# Lock configuration from being changed
--e 2
