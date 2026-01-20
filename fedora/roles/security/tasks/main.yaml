@@ -221,14 +221,6 @@
     group=root 
     mode=0640
 
-# Load new audit rules into active kernel
-# ignore_errors is needed because rules contain -e 2, 
-# which prevents reloading without reboot after first run
-- name: Reload Auditd rules
-  become: true
-  ignore_errors: true 
-  ansible.builtin.command: augenrules --load 
-
 # Copy hosts file, this is a fork of Steven Black's version
 # It blocks malware, social media, and news networks for a distraction-free environment
 - name: Copy hosts file

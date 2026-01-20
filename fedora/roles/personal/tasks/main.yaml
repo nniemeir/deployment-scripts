@@ -5,16 +5,19 @@
   loop: "{{ c_repos }}"
 
 - name: Build the default target
-  ansible.builtin.make:
+  ansible.builtin.command: make
+  args:
     chdir: "/tmp/{{ item }}"
+    creates: "/tmp/{{ item }}/bin/{{ item }}"
   loop: "{{ c_repos }}"
 
-- name: Run 'install' target as root
-  ansible.builtin.make:
+- name: Build the default target
+  ansible.builtin.command: make install
+  args:
     chdir: "/tmp/{{ item }}"
-    target: install
-  loop: "{{ c_repos }}"
+    creates: "/usr/bin/{{ item }}"
   become: true
+  loop: "{{ c_repos }}"
 
 - name: Clone filmfs
   ansible.builtin.git:
@@ -23,13 +26,17 @@
     update: true
 
 - name: Build filmfs
-  ansible.builtin.make:
+  ansible.builtin.command: make
+  args:
     chdir: "/tmp/filmfs"
+    creates: "/tmp/filmfs/bin/filmfs"
 
 - name: Install filmfs
-  ansible.builtin.make:
+  ansible.builtin.command: make install
+  args:
     chdir: "/tmp/filmfs"
-    target: install
+    creates: "{{ ansible_user_dir }}/.local/bin/filmfs"
+  loop: "{{ c_repos }}"
 
 - name: Clone Oui
   ansible.builtin.git:
@@ -37,7 +44,7 @@
     dest: "/tmp/oui"
     update: true
 
-- name: Change the working directory to somedir/ before executing the command
+- name: Install Oui
   ansible.builtin.shell: ./install.sh
   args:
     chdir: /tmp/oui
@@ -65,7 +72,7 @@
     repo: 'https://github.com/nniemeir/wisesay'
     dest: "/tmp/wisesay"
 
-- name: Install Go package
+- name: Install Wisesay
   ansible.builtin.command: go install ./cmd/wisesay
   args:
     chdir: "/tmp/wisesay"
