@@ -36,7 +36,6 @@
   args:
     chdir: "/tmp/filmfs"
     creates: "{{ ansible_user_dir }}/.local/bin/filmfs"
-  loop: "{{ c_repos }}"
 
 - name: Clone Oui
   ansible.builtin.git:
