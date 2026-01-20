@@ -4,7 +4,7 @@
   # Facts are system properties that may be needed to run a given playbook.
   # It is important that we gather facts as the current user in this case so that 
   # ansible_user_dir will refer to the user's home directory rather than root's
-  gather_facts: yes
+  gather_facts: true
 
   pre_tasks:
     - name: Include category variables
@@ -24,6 +24,9 @@
 
     - role: multimedia
       when: install_multimedia | default(true)
+
+    - role: personal
+      when: install_personal | default(true)
 
     - role: professional
       when: install_professional | default(true)

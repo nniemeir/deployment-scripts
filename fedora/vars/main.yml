@@ -2,7 +2,14 @@ install_development: true
 install_gaming: true
 install_general: true
 install_multimedia: true
+install_personal: true
 install_professional: true
 install_security: true
 install_theming: true
 install_virtualization: true
+
+c_repos: 
+  - clownish
+  - cyllenian
+  - germber
+  - orlok

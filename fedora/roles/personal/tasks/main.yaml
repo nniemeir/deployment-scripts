@@ -1,0 +1,73 @@
+- name: Clone C project repositories
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/{{ item }}.git'
+    dest: "/tmp/{{ item }}"
+  loop: "{{ c_repos }}"
+
+- name: Build the default target
+  ansible.builtin.make:
+    chdir: "/tmp/{{ item }}"
+  loop: "{{ c_repos }}"
+
+- name: Run 'install' target as root
+  ansible.builtin.make:
+    chdir: "/tmp/{{ item }}"
+    target: install
+  loop: "{{ c_repos }}"
+  become: true
+
+- name: Clone filmfs
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/filmfs.git'
+    dest: "/tmp/filmfs"
+    update: true
+
+- name: Build filmfs
+  ansible.builtin.make:
+    chdir: "/tmp/filmfs"
+
+- name: Install filmfs
+  ansible.builtin.make:
+    chdir: "/tmp/filmfs"
+    target: install
+
+- name: Clone Oui
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/oui.git'
+    dest: "/tmp/oui"
+    update: true
+
+- name: Change the working directory to somedir/ before executing the command
+  ansible.builtin.shell: ./install.sh
+  args:
+    chdir: /tmp/oui
+    creates: "/usr/bin/oui"
+  become: true
+
+- name: Clone fzf-wuzzy
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/fzf-wuzzy'
+    dest: "{{ ansible_user_dir }}/.fzf-wuzzy"
+    update: false
+
+- name: Clone Merrin System Monitor
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/merrin'
+    dest: "/tmp/merrin"
+
+- name: Install Merrin System Monitor
+  ansible.builtin.pip:
+    chdir: "/tmp/merrin"
+    name: "."
+
+- name: Clone Wisesay
+  ansible.builtin.git:
+    repo: 'https://github.com/nniemeir/wisesay'
+    dest: "/tmp/wisesay"
+
+- name: Install Go package
+  ansible.builtin.command: go install ./cmd/wisesay
+  args:
+    chdir: "/tmp/wisesay"
+    creates: "{{ ansible_user_dir }}/.local/bin/wisesay"
+
